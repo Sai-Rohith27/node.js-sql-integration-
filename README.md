@@ -25,7 +25,7 @@ Today I covered the basics of connecting a Node.js server with a MySQL database.
 - Implement CRUD operations
 
 ##day 2
-  # SQL + Node.js Practice 🚀
+
 
 ## Topics Learned
 
