@@ -1,9 +1,12 @@
-const { faker } = require("@faker-js/faker");
+const { faker, ne } = require("@faker-js/faker");
 const mysql = require('mysql2');
 const express=require('express');
 const app=express();  
 const path=require('path');
 const port=9090;
+const methodoverride=require('method-override');
+app.use(methodoverride("_method"));
+app.use(express.urlencoded({extended:true}));
 app.set("view engine","ejs");
 app.set("views",path.join(__dirname,"/views"));
 const connection = mysql.createConnection({
@@ -39,29 +42,91 @@ function getRandomUser() {
         res.send("Some error in the DB");
     }
  })
+   
+   app.get("/user",(req,res)=>{
+        let q2="select * from info";
+        try{
+          connection.query(q2,(err,result)=>{
+            if(err){throw err;}
+            else{ res.render("showusers",{result});}
+          });
+        }
+        catch(err){
+          console.log(err);
+          res.send("some error in the DB");
+        }
+   });
+
+   app.get("/user/:id/edit",(req,res)=>{
+    let {id}=req.params;
+    let {password:formpass,username:newuser}=req.body;
+    let q3=`select * from info where id=${id}`; 
+     try{
+          connection.query(q3,(err,result)=>{
+            if(err){throw err;}
+            else{
+            let user=result[0];
+              if(formpass!=user.password){
+                res.send("wrong pw bye!");
+                            }
+                            else{
+                              let q4=`update info set username=${newuser} where id=${id}`;
+                              try{
+                                connection.query(q4,(err,re)=>{
+                                  if(err){
+                                    throw err;
+                                  }else{
+                                    res.send(re);
+                                  }
+                                })
+                              } 
+                              catch(err){
+                                
+                              }
+                            }
+               res.send(user);}
+          });
+        }
+        catch(err){
+          console.log(err);
+          res.send("some error in the DB");
+        }
+   });
+
+   app.patch("/user/:id",(req,res)=>{
+    res.send("updated");
+   })
+
  app.listen(9090,()=>{
   console.log("server is listening on pert 9090....");
- })
+ });
  
-//  let q="INSERT INTO info(username,email,password) values ?";
+//   let q="INSERT IGNORE INTO info(username,email,password) values ?";
+//  let data=[];
+// for(let  i=0;i<600;i++){
+//     data.push(getRandomUser());
+//  }
 
-// let data=[];
-// for(let  i=0;i<100;i++){
-//    data.push(getRandomUser());
-// }
+//  try {     connection.query(q,[data],(err,result)=>{
+//             if(err){
+//              throw err;
+//             }
+//             else{
+//              console.log(result);
+//             }
+//      });
+//  }
+//      catch(err){
+//          console.log(err);
+//      }
+// //  connection.end();
+//  console.log(getRandomUser());
 
- // try {
-//     connection.query(q,[data],(err,result)=>{
-//            if(err){
-//             throw err;
-//            }
-//            else{
-//             console.log(result);
-//            }
-//     });
-// }
-//     catch(err){
-//         console.log(err);
-//     }
-// connection.end();
-// console.log(getRandomUser());
+//  function getRandomUser() {
+//    return [
+//       faker.internet.username(),
+//     faker.internet.email(),
+//      faker.internet.password(),
+    
+//    ];
+//  } 
